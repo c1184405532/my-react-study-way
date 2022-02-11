@@ -44,7 +44,7 @@ export function createStore(reducer, enhancer) {
   }
 }
 
-// 中间件，用于加强reducer
+// 应用中间件函数，用于批量调用中间件依次对reducer进行加强
 export function applyMiddleware(...middlewares) {
   // middlewares 是接收的多个中间件内容，顺序调用依次对reducer进行增强。
 

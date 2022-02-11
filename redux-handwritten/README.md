@@ -15,37 +15,35 @@ The page will reload when you make changes.\
 You may also see any lint errors in the console.
 
 
-## 手写antd-form表单
+## 手写redux及中间件
 
-实现antd-form-v4版本的表单组件
+### pages/index
 
-### componnets/BaseForm/index.js
+使用示例入口
 
-form组件入口文件
+### redux/index
 
-### componnets/BaseForm/Form
+redux核心代码，createStore，applyMiddleware
 
-表单外层组件，用于包裹所有表单项。
+### redux-logger/index
 
-### componnets/BaseForm/Field
+中间件logger代码，用于输出日志
 
-表单项组件，用于包裹每一个独立的表单项，如input。
+### redux-promise/index
 
-### componnets/BaseForm/FieldContext
+中间件promise代码，用于执行传入action是promise对象时的处理方案
 
-创建跨层级数据传递
+### redux-thunk/index
 
-### componnets/BaseForm/useForm
+中间件thunk代码，用于执行传入action是函数时的处理方案
 
-表单数据存储区域，事件处理函数等。
+## store/index
 
-## pages/login/index
-
-使用示例，包含类组件和函数组件使用。
+实例化数据源代码
 
 ## 掘金文章地址
 
-[在react中实现一个简易版antdForm表单组件（react^17）](https://juejin.cn/post/7058586914189737997)
+[手写一个redux和中间件](https://juejin.cn/post/7063378395911946253)
 
 
 

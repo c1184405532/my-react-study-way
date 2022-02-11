@@ -8,7 +8,7 @@ export default function logger(midApi) {
     return function(action) {
       
       console.log("中间件 logger开始执行啦！");
-
+      console.log("操作命令：", action.type);
       const prevState = getState();
       console.log("prevState", prevState);
 
