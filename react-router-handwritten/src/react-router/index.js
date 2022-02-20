@@ -1,9 +1,11 @@
 import BrowserRouter from "./BrowserRouter";
-import Link from "./Link";
+import Switch from "./Switch";
 import Route from "./Route";
+import Link from "./Link";
 
 export {
   BrowserRouter,
+  Switch,
+  Route,
   Link,
-  Route
 }
