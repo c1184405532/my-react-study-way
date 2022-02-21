@@ -60,7 +60,7 @@ BrowserRouter核心代码，使用浏览器api，history 中的 pushState 进行
 
 ## 掘金文章地址
 
-[手写一个react-redux](https://juejin.cn/post/7067055849616703495)
+[手写react-router](https://juejin.cn/post/7067055849616703495)
 
 
 
