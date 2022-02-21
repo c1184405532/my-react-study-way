@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { RouterContext } from "./Context";
+import RouterContext from "./RouterContext";
 
 export default class Redirect extends Component {
   render() {
@@ -10,6 +10,7 @@ export default class Redirect extends Component {
           const { to, push = false } = this.props;
           return (
             <LifeCycle
+              // 重定向跳转页面
               onMount={() => {
                 push ? history.push(to) : history.replace(to);
               }}
