@@ -22,7 +22,7 @@ class Route extends Component {
 
         // 匹配 按优先级进行返回 children（函数） > component（组件） > render（函数）> null
         // 不匹配 按优先级进行返回 children > null
-        // 源码中使用连续三元进行匹配，不是很利于学习，所以这里拆分成了 if else
+        // 源码中使用连续三元进行匹配，不是很利于学习观看，所以这里拆分成了 if else
         const createElement = () => {
           if (match) {
             if (children) {
