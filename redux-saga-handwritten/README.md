@@ -15,35 +15,39 @@ The page will reload when you make changes.\
 You may also see any lint errors in the console.
 
 
-## 手写redux及中间件
+## 手写redux-saga
 
 ### pages/index
 
 使用示例入口
 
-### redux/index
+### redux-saga/index
 
-redux核心代码，createStore，applyMiddleware
+入口文件，创建saga中间件
 
-### redux-logger/index
+### redux-saga/effects
 
-中间件logger代码，用于输出日志
+副作用函数入口
 
-### redux-promise/index
+### redux-saga/runSaga
 
-中间件promise代码，用于执行传入action是promise对象时的处理方案
+执行迭代器
 
-### redux-thunk/index
+### redux-saga/proc
 
-中间件thunk代码，用于执行传入action是函数时的处理方案
+循环迭代器，拿到执行结果，并执行callback
 
-## store/index
+## redux-saga/effectRunnerMap
 
-实例化数据源代码
+副作用函数调用结果的执行函数
+
+## redux-saga/channel
+
+数据公共存储区
 
 ## 掘金文章地址
 
-[手写一个redux和中间件](https://juejin.cn/post/7063378395911946253)
+[手写redux-saga](https://juejin.cn/post/7069697510071074847)
 
 
 
