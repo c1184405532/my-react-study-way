@@ -1,5 +1,6 @@
 import { createFiber } from "./fiber";
-import { isStr, updateNode } from "./utils";
+import { renderHooks } from "./hooks";
+import { isStrOrNumber, updateNode, Update } from "./utils";
 
 // 原生标签
 export const updateHostComponent = (wip) => {
@@ -7,7 +8,7 @@ export const updateHostComponent = (wip) => {
   if (!wip.stateNode) {
     wip.stateNode = document.createElement(wip.type);
     // 更新属性
-    updateNode(wip.stateNode, wip.props);
+    updateNode(wip.stateNode, {}, wip.props); // 初始化时 updateNode 没有prevVal, 传空
   }
   // 协调子节点
   reconCileChildren(wip, wip.props.children);
@@ -16,6 +17,7 @@ export const updateHostComponent = (wip) => {
 
 // 函数组件
 export const updateFunctionComponent = (wip) => {
+  renderHooks(wip); // 初始化hooks
   const { type, props } = wip;
   const children = type(props); // 这个type就是函数组件本身，执行它，拿到它的返回结果
   reconCileChildren(wip, children);
@@ -38,14 +40,29 @@ export const updateFragmentComponent = (wip) => {
 
 // 协调子节点（diff），目前只有初始化创建，没有更新复用
 function reconCileChildren(returnFiber, children) {
-  if (isStr(children)) return; // 如果是文本节点，就不需要构建fiber
-
+  if (isStrOrNumber(children)) return; // 如果是字符串或数字文本节点，就不需要构建fiber
+  
   const newChildren = Array.isArray(children) ? children : [children];
   let previousNewFiber = null;
+  let oldFilber = returnFiber.alternate?.child; // 拿到老节点的头节点
 
   for (let i = 0; i < newChildren.length; i++) {
     const newChild = newChildren[i];
-    const newFiber = createFiber(newChild, returnFiber);
+    let newFiber = createFiber(newChild, returnFiber);
+    const same = sameNode(oldFilber, newFiber); // 比对节点，是否可复用
+
+    if (same) { // 更新
+      newFiber = {
+        ...newFiber,
+        // 复用旧的
+        alternate: oldFilber,
+        stateNode:  oldFilber.stateNode,
+        flags: Update
+      }
+    }
+    if (oldFilber) {
+      oldFilber = oldFilber.sibling; // 现在指向头结点，赋值为兄弟节点，下次for循环进来才能正确找到并sameNode。
+    }
 
     if (i === 0) {
       returnFiber.child = newFiber; // 设置头节点的子节点
@@ -57,3 +74,7 @@ function reconCileChildren(returnFiber, children) {
   }
 }
 
+// 同一层级，相同key 相同类型
+const sameNode = (a, b) => {
+  return !!(a && b && a.key === b.key && a.type === b.type);
+}

@@ -1,3 +1,5 @@
+import { Placement } from "./utils";
+
 export const createFiber = (vnode, returnFiber) => {
   const filber = {
     type: vnode.type,
@@ -7,7 +9,9 @@ export const createFiber = (vnode, returnFiber) => {
     child: null, // 第一个子fiber
     sibling: null, // 下一个兄弟fiber
     return: returnFiber, // 父fiber
-    // flags: 
+    flags: Placement, // 标记节点类型
+    alternate: null, // 老节点
+    // memoizedState: , // class中 指state值, 函数组件中 指第0个hook  
   }
   return filber;
 }

@@ -1,13 +1,17 @@
 import { updateClassComponent, updateFragmentComponent, updateFunctionComponent, updateHostComponent } from "./ReactFiberReconciler";
-import { isFn, isStr } from "./utils";
+import { scheduleCallback, shouldYield } from "./scheduler";
+import { isFn, isStrOrNumber, Placement, Update, updateNode } from "./utils";
 
 let wipRoot = null; // 根节点，wip work in progress，当前正在工作当中的fiber
 let nextUnitOfWork = null; // 将要更新的下一个fiber节点
 // 处理更新 (初始化，props， state )
-export function scheduleUpdateOnFiber(filber) {
-  wipRoot = filber;
+export function scheduleUpdateOnFiber(fiber) {
+  fiber.alternate = { ...fiber }; // 根节点初始化时要赋值一个老节点，不然更新时不存在
+  wipRoot = fiber;
   wipRoot.sibling = null; // 避免处理兄弟节点
   nextUnitOfWork = wipRoot; // 初始从根节点开始更新
+
+  scheduleCallback(workLoop); // 执行任务
 }
 
 // 协调
@@ -16,7 +20,7 @@ function performUnitOfWork(wip) {
   // 2. 返回下一个要更新的fiber
 
   const { type } = wip; // 组件类型或节点类型
-  if (isStr(type)) {
+  if (isStrOrNumber(type)) {
     // 原生标签
     updateHostComponent(wip);
   } else if (isFn(type)) { // 函数组件或者类组件
@@ -40,7 +44,7 @@ function performUnitOfWork(wip) {
 }
 
 function workLoop(IdleDeadline) {
-  while (nextUnitOfWork && IdleDeadline.timeRemaining() > 0) {
+  while (nextUnitOfWork && !shouldYield()) {
     nextUnitOfWork = performUnitOfWork(nextUnitOfWork); //更新当前fiber节点，并返回下一个需要更新的fiber节点
   }
 
@@ -50,7 +54,7 @@ function workLoop(IdleDeadline) {
   }
 }
 
-requestIdleCallback(workLoop); // 执行（浏览器有空闲时间时）
+//requestIdleCallback(workLoop); // 执行（浏览器有空闲时间时）
 
 // 提交（dom映射到界面）
 function commitRoot() {
@@ -61,12 +65,20 @@ function commitRoot() {
 function commitWorker(fiber) {
   if (!fiber) return;
 
-  const { stateNode } = fiber;
+  const { flags, stateNode } = fiber;
   let parentNode = getParentNode(fiber); //fiber.return.stateNode; // 查找父节点，如函数式组件，本身没有stateNode，所以需要向上查找，直至找到最近的stateNode
 
   // 三种情况
-  // 1. 提交自己, 目前只有普通元素标签，所以可以直接使用dom添加
-  if (stateNode) parentNode.appendChild(stateNode);
+  // 1. 提交自己
+
+  
+  // 插入 
+  if (flags & Placement && stateNode) parentNode.appendChild(stateNode);
+
+  // 更新
+  if (flags & Update && stateNode) {
+    updateNode(stateNode, fiber.alternate.props, fiber.props);
+  }
 
   // 2. 提交孩子
   commitWorker(fiber.child);

@@ -4,3 +4,5 @@ export class Component {
     this.props = props;
   }
 }
+
+export { useReducer } from "./hooks.js"
