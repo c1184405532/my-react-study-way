@@ -1,5 +1,6 @@
 import { createFiber } from "./fiber";
 import { renderHooks } from "./hooks";
+import { reconCileChildren } from "./ReactChildFiber";
 import { isStrOrNumber, updateNode, Update } from "./utils";
 
 // 原生标签
@@ -39,42 +40,38 @@ export const updateFragmentComponent = (wip) => {
 }
 
 // 协调子节点（diff），目前只有初始化创建，没有更新复用
-function reconCileChildren(returnFiber, children) {
-  if (isStrOrNumber(children)) return; // 如果是字符串或数字文本节点，就不需要构建fiber
+// function reconCileChildren(returnFiber, children) {
+//   if (isStrOrNumber(children)) return; // 如果是字符串或数字文本节点，就不需要构建fiber
   
-  const newChildren = Array.isArray(children) ? children : [children];
-  let previousNewFiber = null;
-  let oldFilber = returnFiber.alternate?.child; // 拿到老节点的头节点
+//   const newChildren = Array.isArray(children) ? children : [children];
+//   let previousNewFiber = null;
+//   let oldFilber = returnFiber.alternate?.child; // 拿到老节点的头节点
 
-  for (let i = 0; i < newChildren.length; i++) {
-    const newChild = newChildren[i];
-    let newFiber = createFiber(newChild, returnFiber);
-    const same = sameNode(oldFilber, newFiber); // 比对节点，是否可复用
+//   for (let i = 0; i < newChildren.length; i++) {
+//     const newChild = newChildren[i];
+//     let newFiber = createFiber(newChild, returnFiber);
+//     const same = sameNode(oldFilber, newFiber); // 比对节点，是否可复用
 
-    if (same) { // 更新
-      newFiber = {
-        ...newFiber,
-        // 复用旧的
-        alternate: oldFilber,
-        stateNode:  oldFilber.stateNode,
-        flags: Update
-      }
-    }
-    if (oldFilber) {
-      oldFilber = oldFilber.sibling; // 现在指向头结点，赋值为兄弟节点，下次for循环进来才能正确找到并sameNode。
-    }
+//     if (same) { // 更新
+//       newFiber = {
+//         ...newFiber,
+//         // 复用旧的
+//         alternate: oldFilber,
+//         stateNode:  oldFilber.stateNode,
+//         flags: Update
+//       }
+//     }
+//     if (oldFilber) {
+//       oldFilber = oldFilber.sibling; // 现在指向头结点，赋值为兄弟节点，下次for循环进来才能正确找到并sameNode。
+//     }
 
-    if (i === 0) {
-      returnFiber.child = newFiber; // 设置头节点的子节点
-    } else {
-      previousNewFiber.sibling = newFiber;
-    }
+//     if (i === 0) {
+//       returnFiber.child = newFiber; // 设置头节点的子节点
+//     } else {
+//       previousNewFiber.sibling = newFiber;
+//     }
 
-    previousNewFiber = newFiber; // 记录当前节点，用于下次给该节点设置兄弟节点
-  }
-}
+//     previousNewFiber = newFiber; // 记录当前节点，用于下次给该节点设置兄弟节点
+//   }
+// }
 
-// 同一层级，相同key 相同类型
-const sameNode = (a, b) => {
-  return !!(a && b && a.key === b.key && a.type === b.type);
-}

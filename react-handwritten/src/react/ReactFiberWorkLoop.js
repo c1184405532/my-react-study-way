@@ -59,13 +59,19 @@ function workLoop(IdleDeadline) {
 // 提交（dom映射到界面）
 function commitRoot() {
   console.log("wipRoot", wipRoot);
-  commitWorker(wipRoot.child); //  从子节点开始提交
+  isFn(wipRoot.type) ? commitWorker(wipRoot) : commitWorker(wipRoot.child); // 如果是函数组件提交本身，否侧从子节点开始提交
 }
 
 function commitWorker(fiber) {
   if (!fiber) return;
 
-  const { flags, stateNode } = fiber;
+  const {type, flags, stateNode } = fiber;
+
+  if (isFn(type)) { // 函数组件有hook effect 需要执行
+    invokeHooks(fiber);
+  }
+
+
   let parentNode = getParentNode(fiber); //fiber.return.stateNode; // 查找父节点，如函数式组件，本身没有stateNode，所以需要向上查找，直至找到最近的stateNode
 
   // 三种情况
@@ -73,17 +79,68 @@ function commitWorker(fiber) {
 
   
   // 插入 
-  if (flags & Placement && stateNode) parentNode.appendChild(stateNode);
+  // if (flags & Placement && stateNode) parentNode.appendChild(stateNode);
+  // 0 1 3 4
+  // 0 1 2 3 4 
+  if (flags & Placement && stateNode) {
+    let hasSiblingNode = foundSiblingNode(fiber, parentNode);
+    if (hasSiblingNode) { // 如果后面有节点就往前插入 否者会变成 0 1 3 4 2
+      parentNode.insertBefore(stateNode, hasSiblingNode);
+    } else {
+      parentNode.appendChild(fiber.stateNode);
+    }
+  }
 
   // 更新
   if (flags & Update && stateNode) {
     updateNode(stateNode, fiber.alternate.props, fiber.props);
   }
 
+  // 删除
+  if (fiber.deletions) {
+    commitDeletions(stateNode || parentNode, fiber.deletions);
+  }
+
+
   // 2. 提交孩子
   commitWorker(fiber.child);
   // 3. 提交下一个兄弟
   commitWorker(fiber.sibling);
+}
+
+function commitDeletions(parentNode, deletions) {
+  deletions.forEach(d => {
+    parentNode.removeChild(getChildNode(d));
+  })
+}
+
+function foundSiblingNode(fiber, parentNode) {
+  let siblingHasNode = fiber.sibling;
+  let node = null;
+  while (siblingHasNode) {
+    node = siblingHasNode.stateNode;
+    if (node && parentNode.contains(node)) {
+      return node;
+    }
+    siblingHasNode = siblingHasNode.sibling;
+  }
+  return null;
+}
+  
+
+// 执行hook effect
+function invokeHooks(wip) {
+  const {updateQueueOfEffect, updateQueueOfLayout} = wip;
+
+  updateQueueOfEffect?.forEach(effect => {
+    scheduleCallback(() => { // 异步执行（下一轮）
+      effect?.create();
+    })
+  })
+
+  updateQueueOfLayout?.forEach(effect => {
+    effect?.create();
+  })
 }
 
 function getParentNode(fiber) {
@@ -94,4 +151,15 @@ function getParentNode(fiber) {
   }
 
   return next.stateNode;
+}
+
+// 找fiber子stateNode
+function getChildNode(fiber) {
+  let tem = fiber;
+
+  while (!tem.stateNode) {
+    tem = tem.child;
+  }
+
+  return tem.stateNode;
 }

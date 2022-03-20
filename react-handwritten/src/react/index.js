@@ -5,4 +5,4 @@ export class Component {
   }
 }
 
-export { useReducer } from "./hooks.js"
+export { useState, useReducer, useEffect, useLayoutEffect } from "./hooks.js"

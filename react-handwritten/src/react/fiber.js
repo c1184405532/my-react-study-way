@@ -11,6 +11,8 @@ export const createFiber = (vnode, returnFiber) => {
     return: returnFiber, // 父fiber
     flags: Placement, // 标记节点类型
     alternate: null, // 老节点
+    deletions: null, // 需要删除的子节点 null || []
+    index: null, // 当前层级下的下标 从0开始
     // memoizedState: , // class中 指state值, 函数组件中 指第0个hook  
   }
   return filber;

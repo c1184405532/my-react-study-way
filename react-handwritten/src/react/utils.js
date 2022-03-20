@@ -5,6 +5,9 @@ export const Placement = 2;
 export const Update = 4;
 export const Deletion = 8;
 
+export const HookLayout = /* */ 0b010;
+export const HookPassive = /* */ 0b100;
+
 export const isStr = s => typeof s === "string";
 
 export const isFn = fn => typeof fn === "function";
@@ -66,4 +69,17 @@ export function updateNode(node, prevVal, nextVal) {
         node[k] = nextVal[k];
       }
     });
+}
+
+export function areHookInputsEqual(nextDeps, prevDeps) {
+  if (prevDeps === null) {
+    return false;
+  }
+  for (let i = 0; i < prevDeps.length && i < nextDeps.length; i++) {
+    if (Object.is(nextDeps[i], prevDeps[i])) {
+      continue;
+    }
+    return false;
+  }
+  return true;
 }

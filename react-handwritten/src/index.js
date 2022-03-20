@@ -2,7 +2,7 @@
 // import ReactDOM from "react-dom";
 import React from 'react';
 import ReactDOM from './react/react-dom';
-import { Component, useReducer } from './react';
+import { Component, useState, useReducer, useEffect, useLayoutEffect } from './react';
 // import './index.css';
 // import App from './App';
 // import reportWebVitals from './reportWebVitals';
@@ -27,17 +27,37 @@ const Fcomponent = (props) => {
   // react中记录了一个工作中的hook（尾标记）
   // workInProgressHook 
   // hook0 -> hook1 -> hook2( === workInProgressHook) 此时添加hook3 (workInProgressHook.next = hook3, workInProgressHook = hook3)
-  // const [count, setCount] = useState(0); // 
+  const [count, setCount] = useState(1); // 
   // const [count3, setCount3] = useState(0); hook按照顺序来存储对应状态，所以要保持顺序的稳定性。
   const [count2, setCount2] = useReducer((x) => x + 1, 0);
+
+  useEffect(() => {
+    console.log("useEffect", count);
+    
+  }, [count])
+
+  useLayoutEffect(() => {
+    console.log("useLayoutEffect", count2);
+    
+  }, [count2])
   
   return (
     <div className="function-component">
-      {/* <p>count: { count}</p>
-      <button onClick={() => { console.log("点击了按钮") }}>点击</button> */}
+      <p>{count}</p>
+      <button onClick={() => { setCount(count => count + 1) }}>点击count</button>
 
-      <p>{ count2}</p>
-      <button onClick={() => { setCount2(1) }}>点击</button>
+      <p>{count2}</p>
+      <button onClick={() => { setCount2(1) }}>点击count2</button>
+
+      {/* {count % 2 === 0  ? <div>count 偶数</div> : <sapn>count 奇数</sapn> } */}
+      <ul>
+        <li key="0">0</li>
+        <li key="1">1</li>
+        {count % 2 === 0 ? <li key="2">2</li> : null }
+        <li key="3">3</li>
+        <li key="4">4</li>
+        
+      </ul>
     </div>
   )
 }
